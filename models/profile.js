@@ -58,6 +58,12 @@ const profileSchema = new mongoose.Schema(
   },
 );
 
+// 스키마 API
+profileSchema.statics.create = function(payload){
+    const profile = new this(payload);
+    return profile.save();
+}
+
 // 모델 API
 const Profile = mongoose.model('Profile', profileSchema);
 
