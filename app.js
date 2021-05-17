@@ -1,18 +1,34 @@
-require('dotenv').config();
-const express = require('express');
+const express = require('express')
+const app = express();
+const bodyParser = require('body-parser');
+
+// App
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.json());
+
+// DB
 const mongoose = require('mongoose');
 
-const app = express();
-const { PORT, MONGO_URI } = process.env;
+// DB connect
+const db = mongoose.connection;
+db.on('error', console.error);
+db.once('open', function(){
+    console.log('디비 연결 완료!')
+})
 
-app.use(express.static('public'));
-app.use(express.urlencoded({extended:true}));
-app.use(express.json());
+mongoose.connect('mongodb://localhost/namwiki');
 
-mongoose
-    .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(()=>console.log('Successfully connected to mongodb'))
-    .catch(e=>console.log(e));
+// Model
+const profileModel = require('./models/profile');
+const Book = require('./models/book');
 
-app.listen(PORT, ()=>console.log(`Server listening on port ${PORT}`));
-    
+// route
+const router = require('./routes')(app, profileModel);
+
+// PORT
+const port = process.env.port || 8080;
+
+// run
+const server = app.listen(port, function() {
+    console.log('서버 런!');
+})
